@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello Moosey! 🫎</title>
+    <link href='https://fonts.googleapis.com/css?family=Darumadrop One' rel='stylesheet'>
+    <style>
+        body {
+            text-align: center;
+            font-family: 'Darumadrop One';font-size: 22px;
+            background-color: #fce4ec;
+            margin: 50px;
+        }
+        h1 {
+            color: #d81b60;
+        }
+        .scratch-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin: 20px auto;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .hidden-content {
+            width: 100%;
+            height: 100%;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 3;
+        }
+        #message {
+            font-size: 20px;
+            color: #880e4f;
+            display: none;
+            margin-top: 20px;
+        }
+        .twinkle-heart {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #ff4081;
+            border-radius: 50%;
+            animation: twinkle 1.5s infinite;
+            opacity: 0;
+        }
+        @keyframes twinkle {
+            0% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1.5); }
+            100% { opacity: 0; transform: scale(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>💖 HAPPY VALENTINE'S DAY! 💖</h1>
+
+    <p style="font-family:'Open Sans';font-size:18px;">⬇️ scratch for a surprise! ⬇️</p>
+
+    <div class="scratch-container">
+        <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcGx0Mm9nNWhxY3U2emFkbXo3bDN4cXd3ZWRqdnQ5ZWlwbG9wZHJjciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/9ZsHoKnjg4ykx3mzTR/giphy.gif" alt="Surprise" class="hidden-content">
+        <canvas id="scratchCanvas"></canvas>
+    </div>
+
+    <p id="message">I love you so much baby!<br>Thank you for coming into my life!</p>
+
+    <script>
+        const canvas = document.getElementById("scratchCanvas");
+        const ctx = canvas.getContext("2d");
+        const container = document.querySelector(".scratch-container");
+        const message = document.getElementById("message");
+
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+
+        function setupScratchLayer() {
+            ctx.fillStyle = "gray";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        let scratchArea = 0;  // Track the scratched area
+
+        function scratch(event) {
+            event.preventDefault();
+
+            const rect = canvas.getBoundingClientRect();
+            const x = (event.touches ? event.touches[0].clientX : event.clientX) - rect.left;
+            const y = (event.touches ? event.touches[0].clientY : event.clientY) - rect.top;
+
+            ctx.globalCompositeOperation = "destination-out";
+            ctx.beginPath();
+            ctx.arc(x, y, 30, 0, Math.PI * 2);
+            ctx.fill();
+
+            createTwinkleHearts(x, y);
+            checkScratchCompletion();
+        }
+
+        function checkScratchCompletion() {
+            // Check how much of the area has been scratched
+            const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+            let scratchedPixels = 0;
+            let totalPixels = pixels.length / 4;  // Each pixel has 4 values (RGBA)
+
+            for (let i = 0; i < pixels.length; i += 4) {
+                if (pixels[i + 3] === 0) { // If alpha value is 0, it's scratched off
+                    scratchedPixels++;
+                }
+            }
+
+            // If 60% or more of the area has been scratched
+            if (scratchedPixels / totalPixels >= 0.95) {
+                message.style.display = "block"; // Show message
+            }
+        }
+
+        function createTwinkleHearts(x, y) {
+            const heart = document.createElement("div");
+            heart.classList.add("twinkle-heart");
+            heart.style.left = `${x + container.offsetLeft - 5}px`;
+            heart.style.top = `${y + container.offsetTop - 5}px`;
+            document.body.appendChild(heart);
+
+            setTimeout(() => heart.remove(), 1500); // Remove after animation
+        }
+
+        // Smooth scratching interaction
+        canvas.addEventListener("mousemove", scratch);
+        canvas.addEventListener("touchmove", scratch);
+
+        setupScratchLayer();
+    </script>
+
+</body>
+</html>
